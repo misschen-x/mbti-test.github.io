@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专业MBTI人格自测 (50题完整版)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #165DFF;
+            --primary-light: #E8F3FF;
+            --primary-dark: #0E42CC;
+            --gray-light: #F5F7FA;
+            --gray: #8C9CAD;
+            --gray-dark: #4E5969;
+            --white: #FFFFFF;
+            --shadow: 0 4px 20px rgba(22, 93, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .container {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 40px;
+            margin-bottom: 20px;
+            display: none;
+            border: 1px solid var(--primary-light);
+        }
+
+        .container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress {
+            height: 8px;
+            background-color: var(--primary-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: var(--gray);
+            margin-top: 8px;
+        }
+
+        .question {
+            font-size: 18px;
+            margin-bottom: 25px;
+            padding: 16px;
+            background-color: var(--primary-light);
+            border-radius: 10px;
+            color: var(--primary-dark);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 14px 20px;
+            background-color: var(--white);
+            border: 2px solid var(--primary-light);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-align: left;
+            color: var(--gray-dark);
+        }
+
+        .option:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .option:active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .mbti-type {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dimension-strength {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .dimension-item {
+            background: var(--primary-light);
+            padding: 10px 20px;
+            border-radius: 20px;
+            color: var(--primary-dark);
+            font-size: 14px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 30px 0;
+        }
+
+        .personality-description {
+            background: var(--primary-light);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .personality-description h3 {
+            color: var(--primary-dark);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .personality-description .section {
+            margin-bottom: 20px;
+        }
+
+        .personality-description .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .restart-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .chart-container {
+                height: 300px;
+            }
+            .question {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome" class="container active">
+        <h1>专业MBTI人格类型自测</h1>
+        <h2>50题完整版 | 基于荣格理论 | 精准分析</h2>
+        <div class="question" style="font-size: 16px; line-height: 1.8;">
+            <div style="margin-bottom: 12px;">
+                <strong>核心维度：</strong><br>
+                🧠 精力来源 (E/I) | 认知方式 (S/N)<br>
+                🎯 决策方式 (T/F) | 生活态度 (J/P)
+            </div>
+            <div>
+                <strong>作答建议：</strong><br>
+                请根据你的自然本能选择，而非工作或社会期待。答案无对错之分，只有偏好之别。
+            </div>
+        </div>
+        <button class="option" onclick="startTest()">开始测试</button>
+    </div>
+
+    <div id="question-container" class="container">
+        <div class="progress-container">
+            <div class="progress">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">题目 1 / 50</div>
+        </div>
+        <div id="question-title" class="question"></div>
+        <div id="options" class="options"></div>
+    </div>
+
+    <div id="result" class="container">
+        <h1>你的MBTI人格分析报告</h1>
+        <div class="mbti-type" id="mbti-result"></div>
+        <div class="dimension-strength" id="dimension-strength"></div>
+        
+        <div class="chart-container">
+            <canvas id="personality-chart"></canvas>
+        </div>
+
+        <div class="personality-description" id="personality-desc"></div>
+
+        <button class="restart-btn" onclick="restartTest()">重新测试</button>
+    </div>
+
+    <script>
+        // 50道专业题目库 - 每个维度12-13题，确保覆盖全面
+        const questions = [
+            // === E/I 维度 (精力来源) 13题 ===
+            { type: "EI", text: "在一个热闹的聚会上，你通常会？", options: [{text: "主动结识新朋友，活跃在人群中", value: "E"}, {text: "和熟悉的小圈子聊天，或在角落观察", value: "I"}] },
+            { type: "EI", text: "结束一天高强度的工作后，你如何充电？", options: [{text: "约朋友吃饭或看电影", value: "E"}, {text: "回家独处，不看手机不社交", value: "I"}] },
+            { type: "EI", text: "当你有了一个好想法，你会？", options: [{text: "立刻想告诉别人并讨论", value: "E"}, {text: "先自己琢磨完善，再决定是否分享", value: "I"}] },
+            { type: "EI", text: "你更倾向于哪种工作模式？", options: [{text: "头脑风暴会议，多人协作", value: "E"}, {text: "独立办公，减少不必要的会议", value: "I"}] },
+            { type: "EI", text: "打电话时，你的感受是？", options: [{text: "喜欢直接沟通，效率高", value: "E"}, {text: "能发消息绝不打电话，有压力", value: "I"}] },
+            { type: "EI", text: "面对陌生的社交场合，你会？", options: [{text: "感到兴奋，视为拓展人脉的机会", value: "E"}, {text: "感到紧张，需要提前做心理建设", value: "I"}] },
+            { type: "EI", text: "别人通常如何评价你？", options: [{text: "外向开朗，话比较多", value: "E"}, {text: "沉稳内敛，善于倾听", value: "I"}] },
+            { type: "EI", text: "假期如果只能选一个，你选？", options: [{text: "出国旅行，体验不同文化", value: "E"}, {text: "在家宅着，看书追剧休息", value: "I"}] },
+            { type: "EI", text: "解决难题时，你更依赖？", options: [{text: "与他人讨论碰撞出火花", value: "E"}, {text: "自己独立思考和查阅资料", value: "I"}] },
+            { type: "EI", text: "在团队中，你更像是？", options: [{text: "气氛的带动者和沟通的桥梁", value: "E"}, {text: "默默做事的核心执行者", value: "I"}] },
+            { type: "EI", text: "收到社交邀请，你通常会？", options: [{text: "大概率答应，除非真的有事", value: "E"}, {text: "大概率拒绝，除非是特别想见的人", value: "I"}] },
+            { type: "EI", text: "描述一件事时，你会？", options: [{text: "声情并茂，喜欢加入手势和表情", value: "E"}, {text: "言简意赅，只讲重点", value: "I"}] },
+            { type: "EI", text: "独处超过3天，你会觉得？", options: [{text: "无聊孤独，想找人玩", value: "E"}, {text: "舒适自在，享受这份宁静", value: "I"}] },
+
+            // === S/N 维度 (认知方式) 12题 ===
+            { type: "SN", text: "看书时，你更关注？", options: [{text: "具体的情节和人物命运", value: "S"}, {text: "故事背后的隐喻和社会意义", value: "N"}] },
+            { type: "SN", text: "学习做菜时，你会？", options: [{text: "严格按照菜谱的克数和步骤来", value: "S"}, {text: "看大概做法，根据感觉自由发挥", value: "N"}] },
+            { type: "SN", text: "你对“成功”的理解更偏向？", options: [{text: "有房有车，存款可观", value: "S"}, {text: "实现自我价值，影响更多人", value: "N"}] },
+            { type: "SN", text: "遇到新事物，你第一反应是？", options: [{text: "它是如何运作的？", value: "S"}, {text: "它还能有什么新用途？", value: "N"}] },
+            { type: "SN", text: "听演讲时，你更喜欢？", options: [{text: "数据翔实、案例具体的干货", value: "S"}, {text: "观点新颖、富有想象力的启发", value: "N"}] },
+            { type: "SN", text: "你记得最清楚的是？", options: [{text: "昨天晚饭吃了什么", value: "S"}, {text: "童年时的某个抽象感受", value: "N"}] },
+            { type: "SN", text: "做计划时，你会？", options: [{text: "细化到每一小时的安排", value: "S"}, {text: "只定大方向和关键节点", value: "N"}] },
+            { type: "SN", text: "你更擅长？", options: [{text: "执行既定方案，把事做细", value: "S"}, {text: "构思新方案，发现新机会", value: "N"}] },
+            { type: "SN", text: "旅游时，你喜欢？", options: [{text: "打卡著名景点，品尝特色美食", value: "S"}, {text: "随意走走，体验当地风土人情", value: "N"}] },
+            { type: "SN", text: "面对一堆杂乱的信息，你会？", options: [{text: "先整理分类，再找规律", value: "S"}, {text: "先找整体框架，再填补细节", value: "N"}] },
+            { type: "SN", text: "你更相信？", options: [{text: "自己的经验和眼见为实", value: "S"}, {text: "自己的直觉和逻辑推理", value: "N"}] },
+            { type: "SN", text: "工作汇报时，你会？", options: [{text: "按时间顺序罗列完成的工作", value: "S"}, {text: "提炼核心成果和未来规划", value: "N"}] },
+
+            // === T/F 维度 (决策方式) 12题 ===
+            { type: "TF", text: "朋友向你哭诉工作不公，你会？", options: [{text: "帮他分析利弊，给出解决方案", value: "T"}, {text: "先安抚情绪，陪他一起吐槽", value: "F"}] },
+            { type: "TF", text: "评价电影好坏，你的标准是？", options: [{text: "逻辑是否严谨，剧情是否合理", value: "T"}, {text: "是否触动人心，情感是否真挚", value: "F"}] },
+            { type: "TF", text: "升职加薪时，你认为应主要依据？", options: [{text: "业绩数据和贡献大小", value: "T"}, {text: "资历深浅和团队和谐", value: "F"}] },
+            { type: "TF", text: "和伴侣吵架，你会？", options: [{text: "冷静下来先讲道理，分清对错", value: "T"}, {text: "先哄好对方，对错以后再说", value: "F"}] },
+            { type: "TF", text: "招聘员工时，你更看重？", options: [{text: "专业能力和硬指标", value: "T"}, {text: "性格人品和团队契合度", value: "F"}] },
+            { type: "TF", text: "看到公益广告，你会？", options: [{text: "理性分析公益项目的效率", value: "T"}, {text: "感性共鸣，想要伸出援手", value: "F"}] },
+            { type: "TF", text: "被批评时，你希望对方？", options: [{text: "直接指出问题，不绕弯子", value: "T"}, {text: "委婉表达，照顾我的感受", value: "F"}] },
+            { type: "TF", text: "你更认同哪句话？", options: [{text: "对事不对人", value: "T"}, {text: "事在人为，人对了事才对", value: "F"}] },
+            { type: "TF", text: "分配任务时，你会？", options: [{text: "谁能力强谁做，追求效率", value: "T"}, {text: "考虑每个人的负担，适当平衡", value: "F"}] },
+            { type: "TF", text: "买东西时，你主要考虑？", options: [{text: "性价比和实用性", value: "T"}, {text: "颜值和个人喜好", value: "F"}] },
+            { type: "TF", text: "看到别人犯错，你会？", options: [{text: "直接指出来，避免他继续错", value: "T"}, {text: "私下委婉提醒，怕他没面子", value: "F"}] },
+            { type: "TF", text: "做决策时，你内心的天平倾向于？", options: [{text: "公平公正的原则", value: "T"}, {text: "人情世故的考量", value: "F"}] },
+
+            // === J/P 维度 (生活态度) 13题 ===
+            { type: "JP", text: "明天要出差，你会？", options: [{text: "今天就收拾好行李，确认好行程", value: "J"}, {text: "明天早上起来收拾，来得及", value: "P"}] },
+            { type: "JP", text: "桌面上的物品，你喜欢？", options: [{text: "分门别类，摆放整齐", value: "J"}, {text: "随手放置，方便拿取即可", value: "P"}] },
+            { type: "JP", text: "收到任务后，你会？", options: [{text: "立刻开始做，越早完成越好", value: "J"}, {text: "先放一放，在截止日期前冲刺", value: "P"}] },
+            { type: "JP", text: "对于突发的计划变更，你会？", options: [{text: "感到烦躁，希望按原计划进行", value: "J"}, {text: "感到新鲜，乐于接受变化", value: "P"}] },
+            { type: "JP", text: "你喜欢的生活状态是？", options: [{text: "井井有条，一切尽在掌握", value: "J"}, {text: "随心所欲，充满未知可能", value: "P"}] },
+            { type: "JP", text: "准备考试时，你会？", options: [{text: "制定复习计划，每天按部就班", value: "J"}, {text: "考前集中突击，效率更高", value: "P"}] },
+            { type: "JP", text: "去餐厅吃饭，你会？", options: [{text: "提前想好要吃什么", value: "J"}, {text: "到了再看菜单，看心情决定", value: "P"}] },
+            { type: "JP", text: "工作时，你习惯？", options: [{text: "先完成一件事，再开始下一件", value: "J"}, {text: "同时处理好几件事，穿插进行", value: "P"}] },
+            { type: "JP", text: "假期计划，你会？", options: [{text: "提前一个月做好详细攻略", value: "J"}, {text: "说走就走，到了目的地再规划", value: "P"}] },
+            { type: "JP", text: "面对截止日期，你会？", options: [{text: "提前几天完成，留出修改时间", value: "J"}, {text: "在截止日期最后一刻提交", value: "P"}] },
+            { type: "JP", text: "你更享受哪种感觉？", options: [{text: "任务完成后的成就感", value: "J"}, {text: "过程中的探索和灵活性", value: "P"}] },
+            { type: "JP", text: "穿衣风格上，你更偏向？", options: [{text: "风格固定，搭配稳妥", value: "J"}, {text: "尝试不同风格，随性混搭", value: "P"}] },
+            { type: "JP", text: "会议结束时，你希望？", options: [{text: "有明确的结论和行动清单", value: "J"}, {text: "充分讨论，暂时没有结论也没关系", value: "P"}] }
+        ];
+
+        let currentQuestionIndex = 0;
+        let scores = {
+            EI: { E: 0, I: 0 },
+            SN: { S: 0, N: 0 },
+            TF: { T: 0, F: 0 },
+            JP: { J: 0, P: 0 }
+        };
+
+        const mbtiDescriptions = {
+            INTJ: {
+                name: "建筑师",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是富有想象力的战略家，具有强大的逻辑思维和远见卓识。你独立、果断，喜欢专注于复杂问题的解决方案，追求创新和效率，不盲从传统。在专业领域，你是天生的专家，擅长透过现象看本质，制定长远的规划并坚定执行。你对自己的标准极高，不满足于平庸，总是在寻找更优解。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的战略思维和独立思考能力。你能快速抓住问题的核心，预见未来的趋势和风险，这让你在需要深度分析和长期规划的领域表现出色。你做事严谨，注重逻辑和证据，很少被情绪左右，能在压力下保持冷静和理性。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于理性和独立，忽视了他人的情感需求和团队协作的重要性。你对效率的追求有时会显得冷漠和不近人情，容易让身边的人感到压力。同时，你对自己和他人的要求都很高，容易陷入完美主义的陷阱，导致拖延和自我怀疑。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要深度思考、战略规划和创新的工作，如战略顾问、系统架构师、科研人员、律师、金融分析师等。这些领域能让你充分发挥你的逻辑思维和远见卓识，同时也能满足你对专业深度和创新的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得内敛和独立，不擅长表达情感。你需要伴侣能够理解你的空间需求，同时也需要学会主动表达自己的感受。你重视深度和真诚，不喜欢表面的社交，因此你的亲密关系通常是高质量的，但也需要更多的耐心和沟通。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注他人的情感需求，学会倾听和共情。不要总是用逻辑来解决所有问题，有时候情感和直觉也很重要。同时，学会接受不完美，给自己和他人更多的宽容和空间。多参与团队协作，体验合作的乐趣，而不是总是独自承担。
+                </div>
+                `
+            },
+            INTP: {
+                name: "逻辑学家",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是创新的发明家，充满好奇心和分析能力。你热爱思考抽象概念，追求知识和逻辑的完美，常常沉浸在自己的思维世界中。你灵活、开放，不喜欢条条框框的束缚，擅长发现问题的核心并提出独特的解决方案，是团队中的“智多星”。你对世界充满好奇，总是在问“为什么”，并试图找到最根本的答案。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的逻辑分析能力和创新思维。你能快速拆解复杂问题，找到其中的规律和漏洞，并用创新的方式解决它们。你对知识的渴望和对真理的追求让你不断学习和成长，总能带来新的视角和想法。你不盲从权威，敢于挑战传统，这让你在需要创新和突破的领域表现出色。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于沉迷于理论和抽象思考，忽视了现实的可行性和执行的重要性。你对细节和日常琐事缺乏耐心，容易陷入“想得多做得少”的困境。同时，你可能显得冷漠和疏离，不擅长处理人际关系和情感问题，容易让身边的人感到被忽视。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要创新思维、逻辑分析和独立研究的工作，如程序员、数据科学家、科研人员、哲学家、设计师等。这些领域能让你充分发挥你的好奇心和分析能力，同时也能满足你对知识和创新的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得理性和疏离，不擅长表达情感。你需要伴侣能够理解你的思维方式，同时也需要学会用更感性的方式表达自己。你重视智力上的共鸣和精神上的契合，因此你的亲密关系通常是基于深度的思想交流，但也需要更多的情感投入和表达。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注现实和执行，把你的想法转化为实际行动。不要总是停留在理论层面，多动手实践，体验从无到有的过程。同时，学会表达自己的情感，关注他人的感受，建立更深厚的人际关系。多参与社交活动，拓展你的视野，而不是总是沉浸在自己的思维世界中。
+                </div>
+                `
+            },
+            ENTJ: {
+                name: "指挥官",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是大胆的领导者，富有自信和决断力。你天生擅长组织和管理，具有强大的战略思维和执行力，喜欢挑战并带领团队实现目标。你直接、坦诚，重视效率和结果，在压力下依然能保持清晰的判断，是天生的领袖和创业家。你对自己和他人都有很高的要求，不满足于现状，总是在追求更高的目标。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的领导能力和执行力。你能快速制定清晰的目标和计划，并带领团队高效执行。你对效率和结果的追求让你在竞争激烈的环境中脱颖而出，总能找到最优解。你自信、果断，不畏惧挑战，这让你在需要领导力和决策力的领域表现出色。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于强势和直接，忽视了他人的感受和团队的和谐。你对效率的追求有时会显得冷酷和不近人情，容易让身边的人感到压力和不满。同时，你可能过于关注结果，忽视了过程中的细节和团队成员的成长，导致团队凝聚力不足。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要领导力、决策力和战略规划的工作，如企业高管、项目经理、律师、金融分析师、创业家等。这些领域能让你充分发挥你的领导才能和执行力，同时也能满足你对挑战和成就的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得强势和控制欲强，不擅长表达情感。你需要伴侣能够理解你的目标导向，同时也需要学会倾听和妥协。你重视伴侣的能力和成就，因此你的亲密关系通常是基于共同的目标和价值观，但也需要更多的情感投入和表达。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注他人的感受和团队的和谐，学会倾听和共情。不要总是用命令的方式沟通，多采用合作和协商的方式。同时，学会放慢脚步，关注过程中的细节和团队成员的成长，而不是只盯着结果。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            ENTP: {
+                name: "辩论家",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是聪明的思想家，充满机智和创造力。你热爱智力上的挑战，擅长发现事物的可能性，喜欢辩论和交流新想法。你灵活、适应力强，不喜欢一成不变的生活，总能在复杂情况中找到创新的解决思路，是打破常规的先锋。你对世界充满好奇，总是在寻找新的视角和方法，不满足于现状。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的创新思维和沟通能力。你能快速发现问题的核心，并提出独特的解决方案。你擅长辩论和说服，能清晰地表达自己的观点，同时也能接受不同的意见。你灵活、适应力强，总能在变化的环境中找到机会，这让你在需要创新和突破的领域表现出色。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于沉迷于辩论和智力挑战，忽视了现实的可行性和执行的重要性。你对细节和日常琐事缺乏耐心，容易陷入“说得多做得少”的困境。同时，你可能显得轻浮和不可靠，不擅长坚持到底，容易让身边的人感到失望。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要创新思维、沟通能力和应变能力的工作，如市场营销、公关、律师、创业家、设计师等。这些领域能让你充分发挥你的创新才能和沟通能力，同时也能满足你对挑战和变化的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得轻浮和不可靠，不擅长表达情感。你需要伴侣能够理解你的好奇心和冒险精神，同时也需要学会坚持和承诺。你重视智力上的共鸣和精神上的自由，因此你的亲密关系通常是基于共同的兴趣和价值观，但也需要更多的情感投入和稳定性。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注现实和执行，把你的想法转化为实际行动。不要总是停留在辩论和理论层面，多动手实践，体验从无到有的过程。同时，学会坚持和承诺，对自己和他人负责。多表达自己的情感，关注他人的感受，建立更深厚的人际关系。
+                </div>
+                `
+            },
+            INFJ: {
+                name: "提倡者",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是安静的理想主义者，富有洞察力和同理心。你深刻理解他人的情感和需求，追求有意义的生活和人际关系，致力于实现自己的价值观。你内敛、专注，擅长发现他人的潜力，是值得信赖的倾听者和顾问，常为了大局默默奉献。你对世界有深刻的洞察，总能看到事物背后的意义和可能性。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的同理心和洞察力。你能深刻理解他人的情感和需求，并用温暖和关怀去支持他们。你对意义和价值的追求让你在需要人文关怀和价值观引领的领域表现出色。你内敛、专注，总能在复杂的环境中保持清晰的判断，这让你成为团队中不可或缺的精神支柱。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于理想主义和敏感，容易受到他人情绪的影响。你对意义和价值的追求有时会显得不切实际，容易让自己陷入失望和自我怀疑。同时，你可能过于内敛和自我牺牲，忽视了自己的需求和感受，导致身心疲惫。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要同理心、洞察力和价值观引领的工作，如心理咨询师、教师、作家、社会工作者、人力资源等。这些领域能让你充分发挥你的同理心和洞察力，同时也能满足你对意义和价值的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得内敛和敏感，不擅长表达情感。你需要伴侣能够理解你的深度和细腻，同时也需要学会主动表达自己的感受。你重视深度和真诚，因此你的亲密关系通常是高质量的，但也需要更多的耐心和沟通。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注自己的需求和感受，学会自我关怀和边界设置。不要总是为了他人牺牲自己，要学会优先考虑自己的幸福和健康。同时，学会接受现实的不完美，不要对自己和他人过于苛刻。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            INFP: {
+                name: "调停者",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是充满诗意的理想主义者，富有创造力和同理心。你重视个人价值观和内心真实，追求自我实现和精神满足，对他人的感受非常敏感。你温柔、包容，擅长用创意和情感连接他人，不喜欢冲突和虚伪，在艺术和人文领域往往能发挥特长。你对世界有独特的视角，总能用诗意和想象力去诠释生活。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的创造力和同理心。你能深刻理解他人的情感和需求，并用创意和情感去表达自己。你对个人价值观和内心真实的追求让你在需要创意和人文关怀的领域表现出色。你温柔、包容，总能在冲突中找到平衡点，这让你成为团队中不可或缺的调和者。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于理想主义和敏感，容易受到他人情绪的影响。你对个人价值观和内心真实的追求有时会显得不切实际，容易让自己陷入失望和自我怀疑。同时，你可能过于内敛和逃避冲突，忽视了现实的问题和责任，导致自己陷入被动。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要创造力、同理心和价值观引领的工作，如作家、艺术家、心理咨询师、教师、社会工作者等。这些领域能让你充分发挥你的创造力和同理心，同时也能满足你对个人价值观和内心真实的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得内敛和敏感，不擅长表达情感。你需要伴侣能够理解你的诗意和细腻，同时也需要学会主动表达自己的感受。你重视深度和真诚，因此你的亲密关系通常是高质量的，但也需要更多的耐心和沟通。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注现实和责任，学会面对冲突和解决问题。不要总是逃避现实，要学会用实际行动去实现自己的理想。同时，学会表达自己的情感和需求，不要总是把自己的感受藏在心里。多参与社交活动，拓展你的视野，而不是总是沉浸在自己的世界中。
+                </div>
+                `
+            },
+            ENFJ: {
+                name: "主人公",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是富有魅力的领导者，热情且有理想。你擅长理解和激励他人，具有强大的社交能力和感染力，致力于帮助他人成长和实现共同目标。你慷慨、负责，重视人际关系的和谐，是天生的团队凝聚者，能让每个人都感到被重视。你对世界充满热情，总能用积极和乐观的态度去影响他人。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的社交能力和领导力。你能快速建立信任和连接，并用热情和理想去激励他人。你对人际关系的重视让你在需要团队协作和沟通的领域表现出色。你慷慨、负责，总能在团队中找到平衡点，这让你成为团队中不可或缺的核心人物。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于关注他人的需求和感受，忽视了自己的需求和边界。你对和谐的追求有时会显得妥协和讨好，容易让自己陷入疲惫和不满。同时，你可能过于理想主义和情绪化，忽视了现实的可行性和逻辑，导致决策失误。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要社交能力、领导力和价值观引领的工作，如教师、培训师、人力资源、市场营销、公关等。这些领域能让你充分发挥你的社交能力和领导力，同时也能满足你对帮助他人和实现共同目标的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得热情和投入，不擅长表达自己的需求。你需要伴侣能够理解你的慷慨和理想，同时也需要学会关注自己的感受。你重视深度和真诚，因此你的亲密关系通常是高质量的，但也需要更多的自我关怀和边界设置。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注自己的需求和感受，学会自我关怀和边界设置。不要总是为了他人牺牲自己，要学会优先考虑自己的幸福和健康。同时，学会用逻辑和理性去分析问题，不要总是被情绪和理想左右。多表达自己的需求，让身边的人知道你的底线和期望。
+                </div>
+                `
+            },
+            ENFP: {
+                name: "竞选者",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是热情的创新者，充满活力和想象力。你热爱生活，善于发现事物的美好，擅长连接不同的人和想法。你乐观、开放，喜欢新体验和新挑战，总能给周围的人带来正能量和创意，在需要灵感和活力的团队中不可或缺。你对世界充满好奇，总是在寻找新的可能性和意义。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的创造力和社交能力。你能快速发现新的可能性和机会，并用热情和创意去实现它们。你对新体验和新挑战的追求让你在需要创新和灵感的领域表现出色。你乐观、开放，总能在困境中找到希望，这让你成为团队中不可或缺的活力源泉。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于冲动和缺乏耐心，容易被新的想法和体验分散注意力。你对细节和日常琐事缺乏耐心，容易陷入“三分钟热度”的困境。同时，你可能过于情绪化和理想化，忽视了现实的可行性和责任，导致自己陷入被动。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要创造力、社交能力和灵感的工作，如市场营销、公关、设计师、作家、创业家等。这些领域能让你充分发挥你的创造力和社交能力，同时也能满足你对新体验和新挑战的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得热情和冲动，不擅长表达自己的深度。你需要伴侣能够理解你的活力和创意，同时也需要学会坚持和承诺。你重视自由和体验，因此你的亲密关系通常是充满乐趣的，但也需要更多的稳定性和深度。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注现实和责任，学会坚持和承诺。不要总是被新的想法和体验分散注意力，要学会专注于重要的事情。同时，学会表达自己的深度和情感，不要总是用表面的热情去掩盖内心的需求。多关注细节和日常琐事，体验从无到有的过程。
+                </div>
+                `
+            },
+            ISFJ: {
+                name: "守卫者",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是专注的保护者，富有责任感和同情心。你重视传统和稳定，擅长照顾他人的实际需求，是可靠的支持者和守护者。你细心、务实，注重细节和承诺，总能把事情安排得井井有条，是家庭和团队中不可或缺的“定海神针”。你对他人的需求非常敏感，总能用实际行动去支持和保护他们。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的责任感和务实能力。你能快速识别他人的实际需求，并用可靠和细致的方式去满足它们。你对传统和稳定的重视让你在需要可靠性和稳定性的领域表现出色。你细心、务实，总能在复杂的环境中保持秩序和稳定，这让你成为团队中不可或缺的支柱。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于保守和固执，忽视了新的可能性和变化。你对传统和稳定的追求有时会显得抗拒改变，容易让自己陷入僵化和停滞。同时，你可能过于自我牺牲和忽视自己的需求，导致身心疲惫和不满。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要责任感、务实能力和关怀的工作，如护士、教师、行政助理、人力资源、社会工作者等。这些领域能让你充分发挥你的责任感和务实能力，同时也能满足你对照顾他人和维护稳定的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得可靠和投入，不擅长表达自己的情感。你需要伴侣能够理解你的责任感和务实，同时也需要学会表达自己的感受。你重视稳定和承诺，因此你的亲密关系通常是可靠和持久的，但也需要更多的情感表达和浪漫。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注新的可能性和变化，学会适应和拥抱改变。不要总是固守传统和稳定，要学会用开放的心态去面对新的挑战。同时，学会关注自己的需求和感受，不要总是为了他人牺牲自己。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            ISFP: {
+                name: "探险家",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是灵活的艺术家，富有创造力和同情心。你热爱当下的体验，擅长用实际行动表达关心，重视个人空间和自由。你温和、随性，喜欢通过艺术、手工等方式表达自我，不喜欢过多的规则束缚，拥有独特的审美和创造力。你对世界有独特的感知，总能用细腻和敏感的方式去体验生活。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的创造力和感知能力。你能快速捕捉到生活中的美好和细节，并用创意和艺术的方式去表达它们。你对当下体验的重视让你在需要审美和创意的领域表现出色。你温和、随性，总能在复杂的环境中保持平静和灵活，这让你成为团队中不可或缺的调和者。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于随性和缺乏规划，容易被当下的体验分散注意力。你对规则和束缚的厌恶有时会显得不负责任，容易让自己陷入被动。同时，你可能过于敏感和内敛，忽视了自己的需求和表达，导致自己被忽视。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要创造力、感知能力和自由的工作，如艺术家、设计师、摄影师、厨师、手工艺人等。这些领域能让你充分发挥你的创造力和感知能力，同时也能满足你对自由和当下体验的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得温和和随性，不擅长表达自己的深度。你需要伴侣能够理解你的敏感和自由，同时也需要学会表达自己的感受。你重视当下和体验，因此你的亲密关系通常是充满乐趣的，但也需要更多的稳定性和深度。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注规划和责任，学会为自己的生活设定目标和方向。不要总是被当下的体验分散注意力，要学会专注于重要的事情。同时，学会表达自己的需求和感受，不要总是把自己的感受藏在心里。多参与社交活动，拓展你的视野，而不是总是沉浸在自己的世界中。
+                </div>
+                `
+            },
+            ESFJ: {
+                name: "执政官",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是热心的东道主，富有责任感和社交能力。你重视人际关系和传统，擅长组织和照顾他人，是团队中的粘合剂。你热情、务实，喜欢创造和谐的氛围，乐于为他人提供帮助和支持，在社交场合中如鱼得水。你对他人的需求非常敏感，总能用热情和行动去支持和照顾他们。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的社交能力和责任感。你能快速建立信任和连接，并用热情和行动去支持他人。你对人际关系和传统的重视让你在需要团队协作和关怀的领域表现出色。你热情、务实，总能在复杂的环境中创造和谐和稳定，这让你成为团队中不可或缺的粘合剂。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于关注他人的需求和感受，忽视了自己的需求和边界。你对和谐的追求有时会显得妥协和讨好，容易让自己陷入疲惫和不满。同时，你可能过于传统和保守，忽视了新的可能性和变化，导致自己陷入僵化和停滞。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要社交能力、责任感和关怀的工作，如护士、教师、行政助理、人力资源、市场营销等。这些领域能让你充分发挥你的社交能力和责任感，同时也能满足你对照顾他人和创造和谐的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得热情和投入，不擅长表达自己的需求。你需要伴侣能够理解你的责任感和热情，同时也需要学会关注自己的感受。你重视稳定和承诺，因此你的亲密关系通常是可靠和持久的，但也需要更多的自我关怀和边界设置。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注自己的需求和感受，学会自我关怀和边界设置。不要总是为了他人牺牲自己，要学会优先考虑自己的幸福和健康。同时，学会用开放的心态去面对新的可能性和变化，不要总是固守传统和稳定。多表达自己的需求，让身边的人知道你的底线和期望。
+                </div>
+                `
+            },
+            ESFP: {
+                name: "表演者",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是热情的艺人，充满活力和社交能力。你热爱生活和体验，擅长即兴发挥，喜欢成为人群的焦点。你乐观、随和，享受当下的快乐，总能用热情和幽默感染周围的人，是聚会的灵魂人物，给世界带来了无限欢乐。你对世界有独特的感知，总能用热情和活力去体验生活。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的社交能力和活力。你能快速吸引他人的注意，并用热情和幽默去感染他们。你对当下体验的重视让你在需要活力和娱乐的领域表现出色。你乐观、随和，总能在困境中找到乐趣，这让你成为团队中不可或缺的活力源泉。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于冲动和缺乏耐心，容易被当下的体验分散注意力。你对细节和日常琐事缺乏耐心，容易陷入“三分钟热度”的困境。同时，你可能过于关注他人的看法和评价，忽视了自己的需求和真实感受，导致自己失去自我。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要社交能力、活力和娱乐的工作，如演员、主持人、销售、市场营销、公关等。这些领域能让你充分发挥你的社交能力和活力，同时也能满足你对当下体验和成为焦点的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得热情和冲动，不擅长表达自己的深度。你需要伴侣能够理解你的活力和热情，同时也需要学会坚持和承诺。你重视当下和体验，因此你的亲密关系通常是充满乐趣的，但也需要更多的稳定性和深度。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注规划和责任，学会为自己的生活设定目标和方向。不要总是被当下的体验分散注意力，要学会专注于重要的事情。同时，学会关注自己的需求和真实感受，不要总是为了他人的看法而活。多表达自己的深度和情感，让身边的人看到你真实的一面。
+                </div>
+                `
+            },
+            ISTJ: {
+                name: "物流师",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是务实的组织者，富有责任感和逻辑性。你重视事实和传统，擅长规划和执行，是可靠的问题解决者。你严谨、自律，注重细节和秩序，总能把事情高效、准确地完成，是任何团队都渴望拥有的骨干力量。你对世界有清晰的认知，总能用逻辑和事实去分析和解决问题。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的责任感和逻辑能力。你能快速识别问题的核心，并用可靠和高效的方式去解决它们。你对事实和传统的重视让你在需要可靠性和稳定性的领域表现出色。你严谨、自律，总能在复杂的环境中保持秩序和效率，这让你成为团队中不可或缺的骨干。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于保守和固执，忽视了新的可能性和变化。你对事实和传统的追求有时会显得抗拒改变，容易让自己陷入僵化和停滞。同时，你可能过于理性和冷漠，忽视了他人的情感需求和团队的和谐，导致自己被孤立。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要责任感、逻辑能力和可靠性的工作，如会计、审计、项目经理、行政助理、工程师等。这些领域能让你充分发挥你的责任感和逻辑能力，同时也能满足你对秩序和效率的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得可靠和理性，不擅长表达情感。你需要伴侣能够理解你的责任感和逻辑，同时也需要学会表达自己的感受。你重视稳定和承诺，因此你的亲密关系通常是可靠和持久的，但也需要更多的情感表达和浪漫。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注新的可能性和变化，学会适应和拥抱改变。不要总是固守事实和传统，要学会用开放的心态去面对新的挑战。同时，学会关注他人的情感需求和团队的和谐，不要总是用逻辑和事实去解决所有问题。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            ISTP: {
+                name: "鉴赏家",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是大胆的实验家，富有好奇心和动手能力。你擅长分析和解决实际问题，喜欢探索事物的工作原理，注重实用性和效率。你冷静、灵活，能在压力下保持理性，擅长即兴应对突发情况，是处理危机的高手。你对世界有独特的视角，总能用实用和高效的方式去解决问题。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的动手能力和应变能力。你能快速拆解复杂问题，并用实用和高效的方式去解决它们。你对实用性和效率的重视让你在需要解决实际问题和应对突发情况的领域表现出色。你冷静、灵活，总能在压力下保持清晰的判断，这让你成为团队中不可或缺的危机处理专家。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于冷漠和疏离，忽视了他人的情感需求和团队的和谐。你对实用性和效率的追求有时会显得冷酷和不近人情，容易让身边的人感到压力和不满。同时，你可能过于冲动和缺乏规划，容易被突发情况分散注意力，导致自己陷入被动。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要动手能力、应变能力和实用性的工作，如工程师、技术支持、警察、消防员、运动员等。这些领域能让你充分发挥你的动手能力和应变能力，同时也能满足你对实用性和效率的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得冷静和疏离，不擅长表达情感。你需要伴侣能够理解你的独立性和理性，同时也需要学会表达自己的感受。你重视自由和空间，因此你的亲密关系通常是灵活和轻松的，但也需要更多的情感投入和表达。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注他人的情感需求和团队的和谐，学会倾听和共情。不要总是用实用和效率去解决所有问题，有时候情感和关系也很重要。同时，学会规划和承诺，对自己和他人负责。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            ESTJ: {
+                name: "总经理",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是高效的管理者，富有决断力和组织能力。你重视秩序和效率，擅长制定规则和执行计划，是天生的组织者。你直接、务实，重视结果和责任，能在复杂情况下快速做出决策，确保团队朝着目标稳步前进。你对世界有清晰的认知，总能用秩序和效率去管理和领导团队。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的组织能力和决断力。你能快速制定清晰的规则和计划，并带领团队高效执行。你对秩序和效率的重视让你在需要管理和领导的领域表现出色。你直接、务实，总能在复杂的环境中保持清晰的判断，这让你成为团队中不可或缺的管理者。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于强势和直接，忽视了他人的感受和团队的和谐。你对秩序和效率的追求有时会显得冷酷和不近人情，容易让身边的人感到压力和不满。同时，你可能过于关注结果，忽视了过程中的细节和团队成员的成长，导致团队凝聚力不足。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要组织能力、决断力和管理能力的工作，如企业高管、项目经理、律师、警察、教师等。这些领域能让你充分发挥你的组织能力和决断力，同时也能满足你对秩序和效率的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得强势和控制欲强，不擅长表达情感。你需要伴侣能够理解你的目标导向，同时也需要学会倾听和妥协。你重视稳定和承诺，因此你的亲密关系通常是可靠和持久的，但也需要更多的情感表达和浪漫。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注他人的感受和团队的和谐，学会倾听和共情。不要总是用命令的方式沟通，多采用合作和协商的方式。同时，学会放慢脚步，关注过程中的细节和团队成员的成长，而不是只盯着结果。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            },
+            ESTP: {
+                name: "企业家",
+                fullDesc: `
+                <div class="section">
+                    <h3>核心特质</h3>
+                    你是精力充沛的感知者，富有活力和应变能力。你擅长把握当下的机会，喜欢行动和挑战，具有强大的适应能力。你务实、乐观，擅长解决实际问题，总能在实践中找到最佳解决方案，是天生的行动派和冒险家。你对世界有独特的视角，总能用行动和实践去创造机会和价值。
+                </div>
+                <div class="section">
+                    <h3>优势</h3>
+                    你的优势在于强大的应变能力和行动力。你能快速识别当下的机会，并用行动和实践去抓住它们。你对实用性和效率的重视让你在需要行动和挑战的领域表现出色。你务实、乐观，总能在困境中找到机会，这让你成为团队中不可或缺的行动派。
+                </div>
+                <div class="section">
+                    <h3>盲点</h3>
+                    你可能过于冲动和缺乏规划，容易被当下的机会分散注意力。你对细节和长期目标缺乏耐心，容易陷入“只顾眼前”的困境。同时，你可能过于冷漠和功利，忽视了他人的情感需求和团队的和谐，导致自己被孤立。
+                </div>
+                <div class="section">
+                    <h3>职业适配</h3>
+                    你适合从事需要应变能力、行动力和实用性的工作，如销售、市场营销、创业家、警察、运动员等。这些领域能让你充分发挥你的应变能力和行动力，同时也能满足你对行动和挑战的追求。
+                </div>
+                <div class="section">
+                    <h3>亲密关系</h3>
+                    在亲密关系中，你可能显得冲动和务实，不擅长表达情感。你需要伴侣能够理解你的行动力和务实，同时也需要学会表达自己的感受。你重视当下和体验，因此你的亲密关系通常是充满乐趣的，但也需要更多的稳定性和深度。
+                </div>
+                <div class="section">
+                    <h3>成长建议</h3>
+                    尝试更多地关注规划和长期目标，学会为自己的生活设定方向和愿景。不要总是被当下的机会分散注意力，要学会专注于重要的事情。同时，学会关注他人的情感需求和团队的和谐，不要总是用实用和效率去解决所有问题。多表达自己的情感，让身边的人感受到你的温暖和关怀。
+                </div>
+                `
+            }
+        };
+
+        function startTest() {
+            document.getElementById('welcome').classList.remove('active');
+            document.getElementById('question-container').classList.add('active');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('question-title').textContent = q.text;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = opt.text;
+                btn.onclick = () => selectOption(q.type, opt.value);
+                optionsContainer.appendChild(btn);
+            });
+
+            updateProgress();
+        }
+
+        function selectOption(type, value) {
+            scores[type][value]++;
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function updateProgress() {
+            const percent = (currentQuestionIndex / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+            document.getElementById('progress-text').textContent = `题目 ${currentQuestionIndex + 1} / ${questions.length}`;
+        }
+
+        function calculateMBTI() {
+            // 50题计分逻辑：每个维度总分12或13分，计算偏好比例
+            const ei = scores.EI;
+            const sn = scores.SN;
+            const tf = scores.TF;
+            const jp = scores.JP;
+
+            const eiType = ei.E > ei.I ? 'E' : 'I';
+            const snType = sn.S > sn.N ? 'S' : 'N';
+            const tfType = tf.T > tf.F ? 'T' : 'F';
+            const jpType = jp.J > jp.P ? 'J' : 'P';
+
+            // 计算强度百分比 (0-100)，数值越大偏好越明显
+            const eiStrength = (Math.abs(ei.E - ei.I) / 13) * 100;
+            const snStrength = (Math.abs(sn.S - sn.N) / 12) * 100;
+            const tfStrength = (Math.abs(tf.T - tf.F) / 12) * 100;
+            const jpStrength = (Math.abs(jp.J - jp.P) / 13) * 100;
+
+            return {
+                type: eiType + snType + tfType + jpType,
+                strengths: {
+                    EI: { type: eiType, strength: eiStrength },
+                    SN: { type: snType, strength: snStrength },
+                    TF: { type: tfType, strength: tfStrength },
+                    JP: { type: jpType, strength: jpStrength }
+                }
+            };
+        }
+
+        function showResult() {
+            document.getElementById('question-container').classList.remove('active');
+            document.getElementById('result').classList.add('active');
+            
+            const mbti = calculateMBTI();
+            const desc = mbtiDescriptions[mbti.type];
+
+            document.getElementById('mbti-result').textContent = `${mbti.type} · ${desc.name}`;
+            
+            const strengthHTML = `
+                <div class="dimension-item">精力来源: ${mbti.strengths.EI.type} (${mbti.strengths.EI.strength.toFixed(0)}%)</div>
+                <div class="dimension-item">认知方式: ${mbti.strengths.SN.type} (${mbti.strengths.SN.strength.toFixed(0)}%)</div>
+                <div class="dimension-item">决策方式: ${mbti.strengths.TF.type} (${mbti.strengths.TF.strength.toFixed(0)}%)</div>
+                <div class="dimension-item">生活态度: ${mbti.strengths.JP.type} (${mbti.strengths.JP.strength.toFixed(0)}%)</div>
+            `;
+            document.getElementById('dimension-strength').innerHTML = strengthHTML;
+            document.getElementById('personality-desc').innerHTML = desc.fullDesc;
+
+            createChart(mbti);
+        }
+
+        function createChart(mbti) {
+            const ctx = document.getElementById('personality-chart').getContext('2d');
+            const s = mbti.strengths;
+
+            // 雷达图数据处理：统一映射为0-100的数值
+            const eScore = s.EI.type === 'E' ? s.EI.strength : 100 - s.EI.strength;
+            const nScore = s.SN.type === 'N' ? s.SN.strength : 100 - s.SN.strength;
+            const fScore = s.TF.type === 'F' ? s.TF.strength : 100 - s.TF.strength;
+            const pScore = s.JP.type === 'P' ? s.JP.strength : 100 - s.JP.strength;
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['外向 (E)', '直觉 (N)', '情感 (F)', '感知 (P)'],
+                    datasets: [{
+                        label: '人格偏好强度',
+                        data: [eScore, nScore, fScore, pScore],
+                        backgroundColor: 'rgba(22, 93, 255, 0.2)',
+                        borderColor: 'rgba(22, 93, 255, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(22, 93, 255, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(22, 93, 255, 0.1)' },
+                            grid: { color: 'rgba(22, 93, 255, 0.1)' },
+                            pointLabels: { font: { size: 14 }, color: '#0E42CC' },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#8C9CAD',
+                                stepSize: 20,
+                                max: 100,
+                                min: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'MBTI人格维度强度雷达图 (50题精准版)',
+                            color: '#0E42CC',
+                            font: { size: 16, weight: '500' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            scores = { EI: { E:0, I:0 }, SN: { S:0, N:0 }, TF: { T:0, F:0 }, JP: { J:0, P:0 } };
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('welcome').classList.add('active');
+            document.getElementById('progress-bar').style.width = '0%';
+        }
+    </script>
+</body>
+</html>
